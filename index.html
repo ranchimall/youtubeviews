@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video & Channel Analytics Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent-red: #ef4444;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0b0f19;
+                --card-bg: #131b2e;
+                --text-main: #f1f5f9;
+                --text-muted: #94a3b8;
+                --border-color: #1e293b;
+                --primary: #3b82f6;
+                --primary-hover: #60a5fa;
+                --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 3rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 860px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+
+        .header {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .header-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.1);
+            padding: 0.4rem 0.9rem;
+            border-radius: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 580px;
+            line-height: 1.5;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 280px;
+            padding: 0.95rem 1.2rem;
+            font-size: 1.05rem;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.95rem 1.6rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.9rem;
+            font-size: 0.85rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(100, 116, 139, 0.18);
+        }
+
+        .chips-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .chip {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.35rem 0.8rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Results Display */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .entity-header {
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .entity-thumb {
+            width: 140px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .entity-thumb.channel {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+        }
+
+        .entity-meta-info {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .entity-badge {
+            align-self: flex-start;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .entity-badge.video {
+            background: var(--accent-red);
+        }
+
+        .entity-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-main);
+        }
+
+        .entity-sub {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .metric-card.highlight {
+            border: 2px solid var(--primary);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.02) 100%);
+        }
+
+        .metric-label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+        }
+
+        .metric-val {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+
+        .metric-card.highlight .metric-val {
+            color: var(--primary);
+        }
+
+        .metric-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .status-box {
+            padding: 1rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .status-box.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-box.info {
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--primary);
+            border: 1px solid rgba(37, 99, 235, 0.25);
+        }
+
+        .spinner {
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 2.5px solid rgba(37, 99, 235, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-logo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                <span>Analytics Tracker</span>
+            </div>
+            <h1>YouTube Views & Analytics</h1>
+            <p>
+                Enter any public YouTube Video URL, Shorts URL, or Channel Handle to retrieve live view counts and statistics.
+            </p>
+        </header>
+
+        <!-- Search Card -->
+        <main class="card">
+
+            <!-- URL Input Bar -->
+            <div class="search-row">
+                <input type="text"
+                       id="yt_input"
+                       class="search-input"
+                       placeholder="Enter YouTube Video URL, Shorts URL, or Channel Handle (@handle)..."
+                       spellcheck="false">
+                <button id="btn_fetch" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    Fetch Views
+                </button>
+            </div>
+
+            <!-- Quick Try Chips -->
+            <div class="chips-container">
+                <span>Quick Try:</span>
+                <span class="chip" data-query="https://www.youtube.com/watch?v=hYMVsUh_Cic">Sample Video</span>
+                <span class="chip" data-query="https://www.youtube.com/@ranchimallflo">@ranchimallflo</span>
+                <span class="chip" data-query="https://www.youtube.com/@mkbhd">@mkbhd</span>
+            </div>
+
+            <!-- Status Container -->
+            <div id="status_box" class="status-box hidden"></div>
+
+        </main>
+
+        <!-- Results Card -->
+        <section id="result_card" class="card results-section hidden">
+
+            <div class="entity-header">
+                <img id="res_thumb" class="entity-thumb" src="" alt="Thumbnail">
+                <div class="entity-meta-info">
+                    <span id="res_badge" class="entity-badge video">Video</span>
+                    <h2 id="res_title" class="entity-title">Title</h2>
+                    <div id="res_sub" class="entity-sub">Channel / Creator</div>
+                </div>
+                <div>
+                    <a id="res_link" href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+                        Open on YouTube &nearr;
+                    </a>
+                </div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card highlight">
+                    <span class="metric-label">Total Views</span>
+                    <span id="m_views" class="metric-val">0</span>
+                    <span id="m_views_sub" class="metric-hint">Lifetime view count</span>
+                </div>
+
+                <div class="metric-card">
+                    <span id="m2_label" class="metric-label">Likes / Subs</span>
+                    <span id="m2_val" class="metric-val">0</span>
+                    <span id="m2_sub" class="metric-hint">Engagement</span>
+                </div>
+
+                <div class="metric-card">
+                    <span id="m3_label" class="metric-label">Comments / Uploads</span>
+                    <span id="m3_val" class="metric-val">0</span>
+                    <span id="m3_sub" class="metric-hint">Content metric</span>
+                </div>
+
+                <div class="metric-card">
+                    <span id="m4_label" class="metric-label">Published Date</span>
+                    <span id="m4_val" class="metric-val">N/A</span>
+                    <span id="m4_sub" class="metric-hint">Timeline</span>
+                </div>
+            </div>
+
+            <!-- Video Embed Preview (for videos) -->
+            <div id="embed_container" class="hidden" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px;">
+                <iframe id="video_embed_frame" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+        // =========================================================================
+        // 🔑 OWNER CONFIGURATION: PASTE YOUR YOUTUBE DATA API V3 KEY HERE
+        //
+        // Once you put your API key here, any public user visiting this page will be
+        // able to enter a YouTube link and immediately see live analytics & views
+        // without setting up or entering any API key themselves!
+        // =========================================================================
+        const BACKEND_API_KEY = "AIzaSyBotkJLkMY-xSAG2aAilg994r_VuarigyM"; 
+
+        (function () {
+            const ytInput = document.getElementById('yt_input');
+            const btnFetch = document.getElementById('btn_fetch');
+            const statusBox = document.getElementById('status_box');
+            const resultCard = document.getElementById('result_card');
+
+            const resThumb = document.getElementById('res_thumb');
+            const resBadge = document.getElementById('res_badge');
+            const resTitle = document.getElementById('res_title');
+            const resSub = document.getElementById('res_sub');
+            const resLink = document.getElementById('res_link');
+
+            const mViews = document.getElementById('m_views');
+            const mViewsSub = document.getElementById('m_views_sub');
+            const m2Label = document.getElementById('m2_label');
+            const m2Val = document.getElementById('m2_val');
+            const m2Sub = document.getElementById('m2_sub');
+            const m3Label = document.getElementById('m3_label');
+            const m3Val = document.getElementById('m3_val');
+            const m3Sub = document.getElementById('m3_sub');
+            const m4Label = document.getElementById('m4_label');
+            const m4Val = document.getElementById('m4_val');
+            const m4Sub = document.getElementById('m4_sub');
+
+            const embedContainer = document.getElementById('embed_container');
+            const videoEmbedFrame = document.getElementById('video_embed_frame');
+
+            function showStatus(msg, type = 'info', loading = false) {
+                statusBox.className = `status-box ${type}`;
+                statusBox.innerHTML = `
+                    ${loading ? '<div class="spinner"></div>' : ''}
+                    <div>${msg}</div>
+                `;
+                statusBox.classList.remove('hidden');
+            }
+
+            function hideStatus() {
+                statusBox.classList.add('hidden');
+                statusBox.innerHTML = '';
+            }
+
+            function parseYouTubeInput(input) {
+                input = input.trim();
+                if (!input) return null;
+
+                // Watch URLs
+                const watchMatch = input.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|shorts\/|live\/))([a-zA-Z0-9_-]{11})/i);
+                if (watchMatch) return { type: 'video', id: watchMatch[1] };
+
+                // Short URL (youtu.be/ID)
+                const shortMatch = input.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/i);
+                if (shortMatch) return { type: 'video', id: shortMatch[1] };
+
+                // Raw Video ID
+                if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return { type: 'video', id: input };
+
+                // Channel ID
+                const channelIdMatch = input.match(/youtube\.com\/channel\/(UC[a-zA-Z0-9_-]{22})/i);
+                if (channelIdMatch) return { type: 'channel_id', id: channelIdMatch[1] };
+
+                // Handle URL
+                const handleMatch = input.match(/youtube\.com\/@([a-zA-Z0-9._-]+)/i);
+                if (handleMatch) return { type: 'handle', handle: handleMatch[1] };
+
+                // Raw Handle
+                if (input.startsWith('@')) return { type: 'handle', handle: input.replace(/^@/, '').split('/')[0] };
+
+                // Raw Channel ID
+                if (/^UC[a-zA-Z0-9_-]{22}$/.test(input)) return { type: 'channel_id', id: input };
+
+                // Custom username / query
+                const customMatch = input.match(/youtube\.com\/(?:c\/|user\/)?([a-zA-Z0-9._-]+)/i);
+                if (customMatch) return { type: 'query', query: customMatch[1] };
+
+                return { type: 'query', query: input };
+            }
+
+            function formatNumber(num) {
+                if (num === null || num === undefined || isNaN(num)) return 'N/A';
+                return Number(num).toLocaleString();
+            }
+
+            async function fetchAnalytics() {
+                const query = ytInput.value.trim();
+                if (!query) {
+                    showStatus('Please enter a YouTube video URL, Shorts link, or channel handle.', 'error');
+                    return;
+                }
+
+                const target = parseYouTubeInput(query);
+                if (!target) {
+                    showStatus('Could not recognize the YouTube URL format.', 'error');
+                    return;
+                }
+
+                const apiKey = BACKEND_API_KEY.trim();
+                if (!apiKey) {
+                    showStatus(
+                        '<strong>API Key Not Configured:</strong> Please open <code>youtube-analytics.html</code> and paste your YouTube API Key into <code>const BACKEND_API_KEY = "..."</code> at line 458.',
+                        'error'
+                    );
+                    return;
+                }
+
+                showStatus('Fetching YouTube analytics data...', 'info', true);
+                resultCard.classList.add('hidden');
+
+                try {
+                    if (target.type === 'video') {
+                        await fetchVideo(target.id, apiKey);
+                    } else if (target.type === 'channel_id') {
+                        await fetchChannel({ id: target.id }, apiKey);
+                    } else if (target.type === 'handle') {
+                        await fetchChannel({ handle: target.handle }, apiKey);
+                    } else {
+                        await fetchChannel({ query: target.query }, apiKey);
+                    }
+                    hideStatus();
+                } catch (err) {
+                    console.error(err);
+                    showStatus(`<strong>Error:</strong> ${err.message || 'Failed to fetch YouTube data.'}`, 'error');
+                }
+            }
+
+            async function fetchVideo(videoId, apiKey) {
+                const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoId}&key=${apiKey}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error?.message || `API error (${res.status})`);
+                }
+                if (!data.items || data.items.length === 0) {
+                    throw new Error('Video not found or is private.');
+                }
+
+                const item = data.items[0];
+                const snip = item.snippet;
+                const stats = item.statistics;
+
+                resBadge.textContent = 'Video';
+                resBadge.className = 'entity-badge video';
+                resThumb.className = 'entity-thumb';
+                resThumb.src = snip.thumbnails?.high?.url || snip.thumbnails?.medium?.url || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+                resTitle.textContent = snip.title;
+                resSub.textContent = `Channel: ${snip.channelTitle}`;
+                resLink.href = `https://www.youtube.com/watch?v=${videoId}`;
+
+                mViews.textContent = formatNumber(stats.viewCount);
+                mViewsSub.textContent = 'Total video views';
+
+                m2Label.textContent = 'Likes';
+                m2Val.textContent = stats.likeCount ? formatNumber(stats.likeCount) : 'Hidden';
+                m2Sub.textContent = 'Audience likes';
+
+                m3Label.textContent = 'Comments';
+                m3Val.textContent = stats.commentCount ? formatNumber(stats.commentCount) : 'N/A';
+                m3Sub.textContent = 'Total comments';
+
+                m4Label.textContent = 'Published';
+                m4Val.textContent = snip.publishedAt ? snip.publishedAt.split('T')[0] : 'N/A';
+                m4Sub.textContent = 'Upload date';
+
+                videoEmbedFrame.src = `https://www.youtube-nocookie.com/embed/${videoId}`;
+                embedContainer.classList.remove('hidden');
+
+                resultCard.classList.remove('hidden');
+            }
+
+            async function fetchChannel(params, apiKey) {
+                let url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&key=${apiKey}`;
+                if (params.id) {
+                    url += `&id=${params.id}`;
+                } else if (params.handle) {
+                    url += `&forHandle=${encodeURIComponent(params.handle)}`;
+                } else {
+                    const sUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(params.query)}&key=${apiKey}`;
+                    const sRes = await fetch(sUrl);
+                    const sData = await sRes.json();
+                    if (!sData.items || sData.items.length === 0) {
+                        throw new Error(`Channel not found for query "${params.query}"`);
+                    }
+                    url += `&id=${sData.items[0].snippet.channelId}`;
+                }
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error?.message || `API error (${res.status})`);
+                }
+                if (!data.items || data.items.length === 0) {
+                    throw new Error('Channel details not found.');
+                }
+
+                const item = data.items[0];
+                const snip = item.snippet;
+                const stats = item.statistics;
+
+                resBadge.textContent = 'Channel';
+                resBadge.className = 'entity-badge';
+                resThumb.className = 'entity-thumb channel';
+                resThumb.src = snip.thumbnails?.high?.url || snip.thumbnails?.medium?.url || '';
+                resTitle.textContent = snip.title;
+                resSub.textContent = snip.customUrl ? snip.customUrl : `ID: ${item.id}`;
+                resLink.href = snip.customUrl ? `https://www.youtube.com/${snip.customUrl}` : `https://www.youtube.com/channel/${item.id}`;
+
+                mViews.textContent = formatNumber(stats.viewCount);
+                mViewsSub.textContent = 'Channel lifetime views';
+
+                m2Label.textContent = 'Subscribers';
+                m2Val.textContent = stats.hiddenSubscriberCount ? 'Hidden' : formatNumber(stats.subscriberCount);
+                m2Sub.textContent = 'Subscribers';
+
+                m3Label.textContent = 'Total Videos';
+                m3Val.textContent = formatNumber(stats.videoCount);
+                m3Sub.textContent = 'Published uploads';
+
+                m4Label.textContent = 'Joined Date';
+                m4Val.textContent = snip.publishedAt ? snip.publishedAt.split('T')[0] : 'N/A';
+                m4Sub.textContent = 'Channel creation';
+
+                embedContainer.classList.add('hidden');
+                videoEmbedFrame.src = '';
+
+                resultCard.classList.remove('hidden');
+            }
+
+            btnFetch.addEventListener('click', fetchAnalytics);
+            ytInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') fetchAnalytics();
+            });
+
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    ytInput.value = chip.getAttribute('data-query');
+                    fetchAnalytics();
+                });
+            });
+
+        })();
+    </script>
+</body>
+</html>
